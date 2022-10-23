@@ -17,8 +17,9 @@ volume_waterchange = 100*u.mm * 300*u.mm * 800*u.mm
 
 molarmass_ratio_SodiumThiosulphate_to_Cl = molarmass_SodiumThiosulphate / molarmass_Cl
 # particle ratio 
-particlenumber_ratio_SodiumThiosulphate_to_Cl = (1*u.mol/u.avogadro_constant) / (4*u.mol/u.avogadro_constant)
+particlenumber_ratio_SodiumThiosulphate_to_Cl = (1*u.molecule) / (4*u.molecule)
 # 1 thiosulphate molecule neutralises 4 Chlorine molecules (Na2S2O3 + 4NaClO + H2O = H2SO4 + Na2SO4 + 4NaCl)
+# S2O3 + 4Cl2 + 5H2O -> SO4 + H2SO4 + 8HCl ? -ullman's industrial chemical
 mass_ratio_SodiumThiosulphate_to_Cl = molarmass_ratio_SodiumThiosulphate_to_Cl * particlenumber_ratio_SodiumThiosulphate_to_Cl
 
 mass_Cl_in_waterchange = mass_fraction_Cl_in_tapwater * volume_waterchange*u.water
