@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-library(units)
+suppressPackageStartupMessages(library(units))
 
 mass_proportion <- function(compound, element) {
     mp <- (atomic_weights[element] * compound[element]) /
