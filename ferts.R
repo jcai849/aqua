@@ -33,38 +33,40 @@ H2O <- list(formula=c(H=2,O=1),
 NPK_prop <- function(compound)
 	mass_proportion(compound, c("N", "P", "K")) / npk_multiplier
 
+volume_aquarium <- set_units(125, l)
+
 fert_npk_prop <- set_units(vapply(solutes, function(x) NPK_prop(x$formula),
 				  numeric(3)),
 			   g/g)
 
 target_weekly_tank_npk <- set_units(c(N=4.4, P=1.1, K=24), mg/kg)
-V <- set_units(125, l)
-mass_optimal_npk <- set_units(V * H2O$density * target_weekly_tank_npk, g)
+mass_optimal_npk <- set_units(volume_aquarium * H2O$density * target_weekly_tank_npk, g)
 
-volume_single_dose <- set_units(6, ml)
+volume_single_dose <- set_units(7, ml)
 doses_per_week <- 3
-volume_dose <- set_units(volume_single_dose * doses_per_week, ml)
+volume_dose <- volume_single_dose * doses_per_week
 volume_container <- set_units(500, ml)
 mass_container_npk <- (volume_container / volume_dose) * mass_optimal_npk
 
 mass_optimal_fert <- set_units(qr.coef(qr(fert_npk_prop), mass_container_npk), g)
-conc_fert_container <- mass_optimal_fert / volume_container
-solubility <-  do.call(c, lapply(solutes, '[[', "solubility"))
-solubility_issue <- any(conc_fert_container > solubility)
-minimum_dose <- volume_dose * max(conc_fert_container / solubility)
+
+volume_solvent <- volume_container - sum(mass_optimal_fert / do.call(c, lapply(solutes, '[[', "density")))
+mass_solvent <- set_units(volume_solvent * H2O$density, g)
+
+conc_solution <- mass_optimal_fert / volume_solvent
+solute_solubility <-  do.call(c, lapply(solutes, '[[', "solubility"))
+solubility_issue <- any(conc_solution > solute_solubility)
+minimum_dose <- volume_dose * max(conc_solution / solute_solubility)
 if (solubility_issue) stop(paste0("solubility issue: increase minimum dose to at least  ", format(minimum_dose)))
+
 solution_npk <- 100 * (mass_container_npk / set_units(volume_container*H2O$density, g))
-
-solvent_volume <- volume_container - sum(mass_optimal_fert / do.call(c, lapply(solutes, '[[', "density")))
-solvent_weight <- set_units(solvent_volume * H2O$density, g)
-
 title <- "Aquarium Fertiliser"
 cat(title, '\n', paste0(rep('-', nchar(title)), collapse=''), '\n\n',
     "Solution NPK: ", paste(round(solution_npk, 1), collapse='-'), "\n",
     doses_per_week, " doses per week of ", format(volume_single_dose), " per dose\n",
-    "targeting a weekly cumulative aquarium NPK of ", paste(round(target_weekly_tank_npk, 1), collapse='-'), '\n\n',
+    "Providing a weekly cumulative aquarium NPK of ", paste(round(target_weekly_tank_npk, 1), collapse='-'), " at ", format(volume_aquarium), " volume \n\n",
     "composition by weight:\n",
-    "H2O: ", format(solvent_weight), '\n',
+    "H2O: ", format(mass_solvent), '\n',
     paste(names(mass_optimal_fert), format(mass_optimal_fert), sep=":", collapse="\n"),
     "\n"
     ,sep='')
