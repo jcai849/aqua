@@ -39,34 +39,44 @@ fert_npk_prop <- set_units(vapply(solutes, function(x) NPK_prop(x$formula),
 				  numeric(3)),
 			   g/g)
 
-target_weekly_tank_npk <- set_units(c(N=4.4, P=1.1, K=24), mg/kg)
-mass_optimal_npk <- set_units(volume_aquarium * H2O$density * target_weekly_tank_npk, g)
+target_cumulative_tank_npk <- set_units(c(N=4.4, P=1.1, K=24), ppm/week) # ppm = mg/kg; values from https://aquariumscience.org/index.php/15-5-3-estimative-index/ (in turn from Tom Barr)
+optimal_cumulative_tank_npk <- set_units(volume_aquarium * H2O$density * target_cumulative_tank_npk, g/week)
+names(optimal_cumulative_tank_npk) <- names(target_cumulative_tank_npk)
+optimal_cumulative_tank_fert <- set_units(qr.coef(qr(fert_npk_prop), optimal_cumulative_tank_npk), g/week)
 
-volume_single_dose <- set_units(7, ml)
-doses_per_week <- 3
-volume_dose <- volume_single_dose * doses_per_week
+volume_dose <- set_units(7, ml)
+dosage_rate <- set_units(3, week^-1)
 volume_container <- set_units(500, ml)
-mass_container_npk <- (volume_container / volume_dose) * mass_optimal_npk
+npk_per_dose <- optimal_cumulative_tank_npk / dosage_rate
+ferts_per_dose <- optimal_cumulative_tank_fert / dosage_rate
 
-mass_optimal_fert <- set_units(qr.coef(qr(fert_npk_prop), mass_container_npk), g)
+mass_container_npk <- (volume_container / volume_dose) * npk_per_dose
+mass_container_fert <- (volume_container / volume_dose) * ferts_per_dose
 
-volume_solvent <- volume_container - sum(mass_optimal_fert / do.call(c, lapply(solutes, '[[', "density")))
+solute_density <- do.call(c, lapply(solutes, '[[', "density"))
+volume_solvent <- volume_container - sum(mass_container_fert / solute_density)
 mass_solvent <- set_units(volume_solvent * H2O$density, g)
+names(mass_solvent) <- "H2O"
 
-conc_solution <- mass_optimal_fert / volume_solvent
+conc_solution <- mass_container_fert / volume_solvent
 solute_solubility <-  do.call(c, lapply(solutes, '[[', "solubility"))
 solubility_issue <- any(conc_solution > solute_solubility)
 minimum_dose <- volume_dose * max(conc_solution / solute_solubility)
 if (solubility_issue) stop(paste0("solubility issue: increase minimum dose to at least  ", format(minimum_dose)))
 
-solution_npk <- 100 * (mass_container_npk / set_units(volume_container*H2O$density, g))
+solution_npk <- set_units(mass_container_npk / set_units(volume_container*H2O$density, g), percent)
+names(solution_npk) <- names(mass_container_npk)
+
+pr <- function(x) paste(capture.output(print(x)), collapse='\n')
 title <- "Aquarium Fertiliser"
 cat(title, '\n', paste0(rep('-', nchar(title)), collapse=''), '\n\n',
-    "Solution NPK: ", paste(round(solution_npk, 1), collapse='-'), "\n",
-    doses_per_week, " doses per week of ", format(volume_single_dose), " per dose\n",
-    "Providing a weekly cumulative aquarium NPK of ", paste(round(target_weekly_tank_npk, 1), collapse='-'), " at ", format(volume_aquarium), " volume \n\n",
-    "composition by weight:\n",
-    "H2O: ", format(mass_solvent), '\n',
-    paste(names(mass_optimal_fert), format(mass_optimal_fert), sep=":", collapse="\n"),
-    "\n"
+    "Providing cumulative aquarium values* of\n", pr(target_cumulative_tank_npk), '\n',
+    "For aquarium volume of ", format(volume_aquarium), "\n",
+    "At the dosage rate of ", format(dosage_rate), '\n\n',
+    "Solutes per dose:\n", pr(round(ferts_per_dose, 3)), '\n\n',
+    "Solution NPK*:\n", pr(round(solution_npk, 1)), '\n',
+    format(volume_dose), " per dose\n",
+    "Solution composition by weight:\n",
+    pr(round(c(mass_solvent, mass_container_fert), 3)), "\n\n",
+    "*Using standard fertilizer NPK labelling\n"
     ,sep='')
