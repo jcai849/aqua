@@ -13,7 +13,7 @@ mass_fraction_Cl_in_tapwater = 2*u.ppm
 
 volume_dose = 1*u.ml
 volume_container = 500*u.ml
-volume_waterchange = 100*u.mm * 300*u.mm * 800*u.mm
+volume_waterchange = 100*u.mm * 350*u.mm * 800*u.mm
 
 molarmass_ratio_SodiumThiosulphate_to_Cl = molarmass_SodiumThiosulphate / molarmass_Cl
 # particle ratio 
