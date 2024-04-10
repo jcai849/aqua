@@ -3,8 +3,12 @@
 import textwrap
 import pint
 
+#TODO: print solution in terms of molarity
+#TODO: print dechlorination in terms of height and width*length
+
 u = pint.UnitRegistry()
 u.define('ppm = mg / kg')
+u.define('mass_percent = g / (100 * g) = (w/w)%')
 
 molarmass_SodiumThiosulphate = 248.18*u.g/u.mol
 density_SodiumThiosulphate = 1.667*u.g/u.cm**3
@@ -36,9 +40,9 @@ concentration_solution = mass_SodiumThiosulphate_in_container / (mass_SodiumThio
 mass_SodiumThiosulphate_in_container.ito_base_units()
 mass_H2O_in_container.ito_base_units()
 volume_waterchange.ito("litres")
-concentration_solution.ito('ppm')
+concentration_solution.ito('mass_percent')
 
-title = f"{concentration_solution:.0f} Sodium Thiosulphate Dechlorinator Solution"
+title = f"{concentration_solution:.2f#P~} Sodium Thiosulphate Dechlorinator Solution"
 print(title)
 print('-' * len(title), end="\n\n")
 for line in textwrap.wrap(f"{volume_dose:~P} of solution dechlorinates {volume_waterchange:P~} of water with a Cl concentration of {mass_fraction_Cl_in_tapwater:P~}.", width=len(title)):

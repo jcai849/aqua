@@ -1,0 +1,38 @@
+Aquarium Fertiliser
+-------------------
+
+Providing cumulative aquarium values* of
+Units: [ppm/week]
+   N    P    K 
+ 4.4  1.1 24.0 
+For aquarium volume of 125 [L]
+At the dosage rate of 3 [1/week]
+
+Solutes per dose:
+Units: [g]
+  KNO3 KH2PO4  K2SO4 
+ 1.321  0.088  0.652 
+
+Solution NPK*:
+Units: [percent]
+   N    P    K 
+ 2.6  0.7 14.3 
+7 [ml] per dose
+Solution composition by weight:
+Units: [g]
+    H2O    KNO3  KH2PO4   K2SO4 
+434.102  94.351   6.266  46.579 
+
+*Using standard fertilizer NPK labelling
+
+
+94313 ppm Sodium Thiosulphate Dechlorinator Solution
+----------------------------------------------------
+
+1 ml of solution dechlorinates 28.0 l of water with
+a Cl concentration of 2 ppm.
+
+
+Constituents:
+ o H2O:                 470.60 g
+ o Sodium Thiosulphate: 49.01 g
